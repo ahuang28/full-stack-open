@@ -1,13 +1,13 @@
 import SinglePerson from "./SinglePerson";
 
-const Persons = ({ persons }) => {
+const Persons = ({ persons, deletePerson }) => {
   return (
     <div>
       {persons.map((person) => (
-        // <div key={person.name}>
-        //   {person.name} {person.number}
-        // </div>
-        <SinglePerson key={person.name} person={person} />
+        <div key={person.id}>
+          <SinglePerson person={person} />
+          <button onClick={() => deletePerson(person.id)}>delete</button>
+        </div>
       ))}
     </div>
   );
