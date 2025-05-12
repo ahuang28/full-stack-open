@@ -4,11 +4,20 @@ import PersonForm from "./components/PersonForm";
 import Filter from "./components/Filter";
 import personsService from "./services/persons";
 
+const Notification = ({ message }) => {
+  if (message === "") {
+    return null;
+  }
+
+  return <div className="success">{message}</div>;
+};
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [newFilter, setNewFilter] = useState("");
+  const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
     personsService.getAll().then((initialPersons) => {
@@ -28,6 +37,10 @@ const App = () => {
           )
         ) {
           changeNumber(person.id);
+          setNewMessage(`Number changed for ${person.name}`);
+          setTimeout(() => {
+            setNewMessage("");
+          }, 5000);
         }
       } else {
         alert(`${newName} ${newNumber} is already added to phonebook`);
@@ -37,6 +50,10 @@ const App = () => {
         name: newName,
         number: newNumber,
       };
+      setNewMessage(`Added ${newName}`);
+      setTimeout(() => {
+        setNewMessage("");
+      }, 5000);
       personsService.create(personObject).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
       });
@@ -57,9 +74,19 @@ const App = () => {
     const person = persons.find((p) => p.id === id);
     const changedPerson = { ...person, number: newNumber };
 
-    personsService.update(id, changedPerson).then((returnedPerson) => {
-      setPersons(persons.map((person) => (person.id === id ? returnedPerson : person)));
-    });
+    personsService
+      .update(id, changedPerson)
+      .then((returnedPerson) => {
+        setPersons(persons.map((person) => (person.id === id ? returnedPerson : person)));
+      })
+      .catch(() => {
+        setNewMessage(`Information of ${person.name} has already been removed from server`);
+        setTimeout(() => {
+          setNewMessage("");
+        }, 5000);
+        setNewName("");
+        setNewNumber("");
+      });
   };
 
   const handleNameChange = (event) => {
@@ -81,6 +108,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={newMessage} />
       <Filter newFilter={newFilter} handleFilterChange={handleFilterChange} />
       <h3>add a new</h3>
       <PersonForm
