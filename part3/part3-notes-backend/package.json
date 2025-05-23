@@ -1,7 +1,6 @@
 {
   "author": "Amy Huang",
   "dependencies": {
-    "cors": "^2.8.5",
     "express": "^5.1.0"
   },
   "description": "",
@@ -9,7 +8,7 @@
   "main": "index.js",
   "name": "backend",
   "scripts": {
-    "build:ui": "rm -rf dist && cd ../../part2/part2-notes-frontend && npm ci && npm run build && cp -r dist ../../part3/part3-notes-backend",
+    "build:ui": "rm -rf dist && cd ../frontend && npm ci && npm run build && cp -r dist ..-backend",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
     "dev": "node --watch index.js",
     "start": "node index.js",
