@@ -4,12 +4,12 @@ import PersonForm from "./components/PersonForm";
 import Filter from "./components/Filter";
 import personsService from "./services/persons";
 
-const Notification = ({ message }) => {
-  if (message === "") {
+const Notification = ({ message, type }) => {
+  if (!message) {
     return null;
   }
 
-  return <div className="success">{message}</div>;
+  return <div className={type}>{message}</div>;
 };
 
 const App = () => {
@@ -17,7 +17,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [newFilter, setNewFilter] = useState("");
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState({ message: null, type: null });
 
   useEffect(() => {
     personsService.getAll().then((initialPersons) => {
@@ -37,9 +37,9 @@ const App = () => {
           )
         ) {
           changeNumber(person.id);
-          setNewMessage(`Number changed for ${person.name}`);
+          setNewMessage({ message: `Number changed for ${person.name}`, type: "success" });
           setTimeout(() => {
-            setNewMessage("");
+            setNewMessage({ message: null, type: null });
           }, 5000);
         }
       } else {
@@ -54,9 +54,18 @@ const App = () => {
       setTimeout(() => {
         setNewMessage("");
       }, 5000);
-      personsService.create(personObject).then((returnedPerson) => {
-        setPersons(persons.concat(returnedPerson));
-      });
+      personsService
+        .create(personObject)
+        .then((returnedPerson) => {
+          setPersons(persons.concat(returnedPerson));
+        })
+        .catch((error) => {
+          console.log(error.response.data.error);
+          setNewMessage({ message: error.response.data.error, type: "error" });
+          setTimeout(() => {
+            setNewMessage("");
+          }, 5000);
+        });
     }
     setNewName("");
     setNewNumber("");
@@ -79,8 +88,9 @@ const App = () => {
       .then((returnedPerson) => {
         setPersons(persons.map((person) => (person.id === id ? returnedPerson : person)));
       })
-      .catch(() => {
-        setNewMessage(`Information of ${person.name} has already been removed from server`);
+      .catch((error) => {
+        console.log(error.response.data.error);
+        setNewMessage({ message: error.response.data.error, type: "error" });
         setTimeout(() => {
           setNewMessage("");
         }, 5000);
@@ -108,7 +118,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={newMessage} />
+      <Notification message={newMessage.message} type={newMessage.type} />
       <Filter newFilter={newFilter} handleFilterChange={handleFilterChange} />
       <h3>add a new</h3>
       <PersonForm
